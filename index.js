@@ -1,5 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const cors = require('cors');
 
 // Load env vars
 dotenv.config();
@@ -18,6 +19,13 @@ app.use(express.json());
 if (process.env.NODEENV === 'development') {
   app.use(morgan('dev'));
 }
+
+// Enable CORS
+app.use(
+  cors({
+    origin: '*',
+  })
+);
 
 app.get('/', (req, res) => {
   res.json({
