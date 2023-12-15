@@ -94,7 +94,15 @@ const getBalanceList = async (req, res) => {
       });
     }
 
-    const balanceArray = await Balance.find({ _uid });
+    // From Date extract month and year
+    const date = new Date();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    const balanceArray = await Balance.find({
+      _uid,
+      date: { $regex: month, $regex: year },
+    });
 
     if (balanceArray.length !== 0) {
       res.status(200).json(balanceArray);
@@ -120,7 +128,16 @@ const getExpenseList = async (req, res) => {
       });
     }
 
-    const balanceArray = await Balance.find({ _uid, type: EXPENSE });
+    // From Date extract month and year
+    const date = new Date();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    const balanceArray = await Balance.find({
+      _uid,
+      type: EXPENSE,
+      date: { $regex: month, $regex: year },
+    });
 
     if (balanceArray.length !== 0) {
       res.status(200).json(balanceArray);
@@ -146,7 +163,16 @@ const getIncomeList = async (req, res) => {
       });
     }
 
-    const balanceArray = await Balance.find({ _uid, type: INCOME });
+    // From Date extract month and year
+    const date = new Date();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    const balanceArray = await Balance.find({
+      _uid,
+      type: INCOME,
+      date: { $regex: month, $regex: year },
+    });
 
     if (balanceArray.length !== 0) {
       res.status(200).json(balanceArray);
@@ -247,23 +273,40 @@ const getSummaryOfIncomeAndExpense = async (req, res) => {
 
 const getSummaryOfIncomeAndExpenseByMonth = async (req, res) => {
   try {
-    const { _uid, month } = req.body;
+    const { _uid, date } = req.body;
 
-    if (!_uid || !month) {
+    if (!_uid || !date) {
       return res.status(400).json({
         message: 'Please provide user id and month',
       });
     }
 
+    // Current date to next month data extract from database
+    // 2022-12-13 18:40:07 to 2023-01-13 18:40:07
+    const dateArray = date.split('-');
+    const year = dateArray[0];
+    const month = dateArray[1];
+    const dateN = dateArray[2].split('T')[0];
+    const nextMonth = Number(month) + 1;
+
+    const currentDate = `${year}-${month}-${dateN}`;
+
+    // if month is december then next month is january of next year
+    const nextMonthDate =
+      nextMonth === 13
+        ? `${Number(year) + 1}-01-${dateN}`
+        : `${year}-${nextMonth}-${dateN}`;
+
     const incomeArray = await Balance.find({
       _uid,
       type: INCOME,
-      date: { $regex: month },
+      date: { $gte: currentDate, $lt: nextMonthDate },
     });
+
     const expenseArray = await Balance.find({
       _uid,
       type: EXPENSE,
-      date: { $regex: month },
+      date: { $gte: currentDate, $lt: nextMonthDate },
     });
 
     const income = incomeArray.reduce((acc, cur) => acc + cur.amount, 0);
@@ -272,7 +315,29 @@ const getSummaryOfIncomeAndExpenseByMonth = async (req, res) => {
     const summary = {
       income: income.toFixed(2),
       expense: expense.toFixed(2),
+      incomeArray,
+      expenseArray,
     };
+
+    // const incomeArray = await Balance.find({
+    //   _uid,
+    //   type: INCOME,
+    //   date: { $regex: month, $regex: year },
+    // });
+    // const expenseArray = await Balance.find({
+    //   _uid,
+    //   type: EXPENSE,
+    //   date: { $regex: month, $regex: year },
+    // });
+
+    // const income = incomeArray.reduce((acc, cur) => acc + cur.amount, 0);
+    // const expense = expenseArray.reduce((acc, cur) => acc + cur.amount, 0);
+
+    // const summary = {
+    //   income: income.toFixed(2),
+    //   expense: expense.toFixed(2),
+    //   incomeArray,
+    // };
 
     res.status(200).json(summary);
   } catch (error) {
