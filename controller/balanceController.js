@@ -206,9 +206,35 @@ const getSummaryOfIncomeAndExpense = async (req, res) => {
     const income = incomeArray.reduce((acc, cur) => acc + cur.amount, 0);
     const expense = expenseArray.reduce((acc, cur) => acc + cur.amount, 0);
 
+    // Extract current month from date
+    const date = new Date();
+    const currentMonth = date.getMonth() + 1;
+
+    const currentMonthIncomeArray = await Balance.find({
+      _uid,
+      type: INCOME,
+      date: { $regex: currentMonth },
+    });
+    const currentMonthExpenseArray = await Balance.find({
+      _uid,
+      type: EXPENSE,
+      date: { $regex: currentMonth },
+    });
+
+    const currentMonthIncome = currentMonthIncomeArray.reduce(
+      (acc, cur) => acc + cur.amount,
+      0
+    );
+    const currentMonthExpense = currentMonthExpenseArray.reduce(
+      (acc, cur) => acc + cur.amount,
+      0
+    );
+
     const summary = {
       income: income.toFixed(2),
       expense: expense.toFixed(2),
+      currentMonthIncome: currentMonthIncome.toFixed(2),
+      currentMonthExpense: currentMonthExpense.toFixed(2),
     };
 
     res.status(200).json(summary);
