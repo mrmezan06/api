@@ -292,26 +292,26 @@ const getSummaryOfIncomeAndExpenseByDate = async (req, res) => {
     const year = dateArray[0];
     const month = dateArray[1];
     const dateN = dateArray[2].split('T')[0];
-    const nextMonth = Number(month) + 1;
+    const prevMonth = Number(month) - 1;
 
     const currentDate = `${year}-${month}-${dateN}`;
 
     // if month is december then next month is january of next year
-    const nextMonthDate =
-      nextMonth === 0
+    const prevMonthDate =
+      prevMonth === 0
         ? `${Number(year) - 1}-12-${dateN}`
-        : `${year}-${nextMonth}-${dateN}`;
+        : `${year}-${prevMonth}-${dateN}`;
 
     const incomeArray = await Balance.find({
       _uid,
       type: INCOME,
-      date: { $gte: currentDate, $lt: nextMonthDate },
+      date: { $gte: prevMonthDate, $lte: currentDate },
     });
 
     const expenseArray = await Balance.find({
       _uid,
       type: EXPENSE,
-      date: { $gte: currentDate, $lt: nextMonthDate },
+      date: { $gte: prevMonthDate, $lte: currentDate },
     });
 
     const income = incomeArray.reduce((acc, cur) => acc + cur.amount, 0);
