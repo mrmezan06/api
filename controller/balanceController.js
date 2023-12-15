@@ -131,11 +131,12 @@ const getExpenseList = async (req, res) => {
     const dateArray = date.split('-');
     const year = dateArray[0];
     const month = dateArray[1];
+    const ymFormat = `${year}-${month}`;
 
     const balanceArray = await Balance.find({
       _uid,
       type: EXPENSE,
-      date: { $regex: month, $regex: year },
+      date: { $regex: ymFormat },
     });
 
     if (balanceArray.length !== 0) {
@@ -167,10 +168,13 @@ const getIncomeList = async (req, res) => {
     const year = dateArray[0];
     const month = dateArray[1];
 
+    const ymFormat = `${year}-${month}`; // year and month format
+
+    // year and month exact match else return empty array
     const balanceArray = await Balance.find({
       _uid,
       type: INCOME,
-      date: { $regex: month, $regex: year },
+      date: { $regex: ymFormat },
     });
 
     if (balanceArray.length !== 0) {
