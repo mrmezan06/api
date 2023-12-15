@@ -261,6 +261,8 @@ const getSummaryOfIncomeAndExpense = async (req, res) => {
       expense: expense.toFixed(2),
       currentMonthIncome: currentMonthIncome.toFixed(2),
       currentMonthExpense: currentMonthExpense.toFixed(2),
+      incomeArray,
+      expenseArray,
     };
 
     res.status(200).json(summary);
