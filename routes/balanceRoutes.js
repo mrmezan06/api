@@ -9,7 +9,7 @@ const {
   getIncomeList,
   deleteBalance,
   getSummaryOfIncomeAndExpense,
-  getSummaryOfIncomeAndExpenseByMonth,
+  getSummaryOfIncomeAndExpenseByDate,
 } = require('../controller/balanceController');
 
 /* Balance Routes */
@@ -21,7 +21,7 @@ router.route('/get-expense-list').post(getExpenseList);
 router.route('/get-income-list').post(getIncomeList);
 router.route('/delete-balance').post(deleteBalance);
 router.route('/get-summary').post(getSummaryOfIncomeAndExpense);
-router.route('/get-summary-by-month').post(getSummaryOfIncomeAndExpenseByMonth);
+router.route('/get-summary-by-month').post(getSummaryOfIncomeAndExpenseByDate);
 
 
 module.exports = router;
