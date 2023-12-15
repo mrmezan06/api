@@ -190,6 +190,72 @@ const deleteBalance = async (req, res) => {
   }
 };
 
+const getSummaryOfIncomeAndExpense = async (req, res) => {
+  try {
+    const { _uid } = req.body;
+
+    if (!_uid) {
+      return res.status(400).json({
+        message: 'Please provide user id',
+      });
+    }
+
+    const incomeArray = await Balance.find({ _uid, type: INCOME });
+    const expenseArray = await Balance.find({ _uid, type: EXPENSE });
+
+    const income = incomeArray.reduce((acc, cur) => acc + cur.amount, 0);
+    const expense = expenseArray.reduce((acc, cur) => acc + cur.amount, 0);
+
+    const summary = {
+      income: income.toFixed(2),
+      expense: expense.toFixed(2),
+    };
+
+    res.status(200).json(summary);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Something went wrong',
+    });
+  }
+};
+
+const getSummaryOfIncomeAndExpenseByMonth = async (req, res) => {
+  try {
+    const { _uid, month } = req.body;
+
+    if (!_uid || !month) {
+      return res.status(400).json({
+        message: 'Please provide user id and month',
+      });
+    }
+
+    const incomeArray = await Balance.find({
+      _uid,
+      type: INCOME,
+      date: { $regex: month },
+    });
+    const expenseArray = await Balance.find({
+      _uid,
+      type: EXPENSE,
+      date: { $regex: month },
+    });
+
+    const income = incomeArray.reduce((acc, cur) => acc + cur.amount, 0);
+    const expense = expenseArray.reduce((acc, cur) => acc + cur.amount, 0);
+
+    const summary = {
+      income: income.toFixed(2),
+      expense: expense.toFixed(2),
+    };
+
+    res.status(200).json(summary);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Something went wrong',
+    });
+  }
+};
+
 module.exports = {
   addExpense,
   addIncome,
@@ -197,4 +263,6 @@ module.exports = {
   getExpenseList,
   getIncomeList,
   deleteBalance,
+  getSummaryOfIncomeAndExpense,
+  getSummaryOfIncomeAndExpenseByMonth,
 };
